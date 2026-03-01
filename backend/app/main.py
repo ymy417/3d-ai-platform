@@ -1,5 +1,6 @@
-﻿from fastapi import FastAPI
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from app.api.v1 import api_router
 
 app = FastAPI(
     title="3D AI角色创作平台 - 后端API",
@@ -7,7 +8,6 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# 跨域配置
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -16,7 +16,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# 健康检查接口
+app.include_router(api_router, prefix="/api/v1")
+
+
 @app.get("/", tags=["健康检查"])
 def health_check():
     return {"status": "ok", "message": "3D AI Platform Backend Running"}

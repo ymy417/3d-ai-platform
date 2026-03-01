@@ -9,9 +9,9 @@ class Settings(BaseSettings):
 
     # 数据库配置（你的本地环境）
     MYSQL_HOST: str = "localhost"
-    MYSQL_PORT: int = 3308  # 你的MySQL端口是3308
+    MYSQL_PORT: int = 3306  # MySQL默认端口
     MYSQL_USER: str = "root"  # 你的MySQL用户是root
-    MYSQL_PASSWORD: str = "jlsm8a309"  # 你的MySQL密码
+    MYSQL_PASSWORD: str = "670406"  # 你的MySQL密码
     MYSQL_DATABASE: str = "3d_ai_platform"  # 你的数据库名
 
     MONGODB_URL: str = "mongodb://root:jlsm8a309@localhost:27017/admin"  # 你的MongoDB配置
