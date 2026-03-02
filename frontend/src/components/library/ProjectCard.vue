@@ -239,6 +239,10 @@ const handleViewAuthor = () => {
   }
 }
 
+.project-item:hover .project-checkbox {
+  display: block;
+}
+
 .project-thumbnail {
   position: relative;
   width: 100%;

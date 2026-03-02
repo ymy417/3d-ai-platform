@@ -93,7 +93,18 @@
             <div v-else v-for="comment in comments" :key="comment.id" class="comment-item">
               <div class="comment-header">
                 <span class="comment-author">{{ comment.username || comment.user_id }}</span>
-                <span class="comment-date">{{ formatDate(comment.created_at) }}</span>
+                <div class="comment-actions">
+                  <span class="comment-date">{{ formatDate(comment.created_at) }}</span>
+                  <el-button 
+                    v-if="isLoggedIn && comment.user_id === authStore.user?.id" 
+                    type="text" 
+                    size="small" 
+                    @click="handleDeleteComment(comment.id)"
+                    class="delete-button"
+                  >
+                    <el-icon><Delete /></el-icon>删除
+                  </el-button>
+                </div>
               </div>
               <div class="comment-content">
                 {{ comment.content }}
@@ -270,6 +281,15 @@ const handleAddComment = async () => {
   }
 }
 
+const handleDeleteComment = async (commentId: number) => {
+  try {
+    await galleryStore.deleteComment(Number(projectId.value), commentId)
+    ElMessage.success('评论删除成功')
+  } catch (error) {
+    ElMessage.error('删除评论失败')
+  }
+}
+
 // 工具函数
 const formatDate = (dateString: string) => {
   const date = new Date(dateString)
@@ -437,8 +457,21 @@ onMounted(() => {
             color: #303133;
           }
 
-          .comment-date {
-            color: #909399;
+          .comment-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+
+            .comment-date {
+              color: #909399;
+            }
+
+            .delete-button {
+              color: #f56c6c;
+              &:hover {
+                color: #f78989;
+              }
+            }
           }
         }
 

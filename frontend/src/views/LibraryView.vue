@@ -49,6 +49,12 @@
           <el-icon><SortUp /></el-icon>
         </el-radio-button>
       </el-radio-group>
+
+      <div class="batch-actions" v-if="selectedProjects.length > 0">
+        <el-button type="danger" @click="handleBatchDelete">
+          <el-icon><Delete /></el-icon>批量删除 ({{ selectedProjects.length }})
+        </el-button>
+      </div>
     </div>
 
     <!-- 项目列表 -->
@@ -70,15 +76,16 @@
 
       <!-- 项目网格 -->
       <div v-else class="projects-grid">
-        <ProjectCard
-          v-for="project in projectStore.projects"
-          :key="project.id"
-          :project="project"
-          :is-public="false"
-          @edit="handleEdit"
-          @delete="handleDeleteSuccess"
-          @view="handleViewProject"
-        />
+        <div class="project-item" v-for="project in projectStore.projects" :key="project.id">
+          <el-checkbox v-model="selectedProjects" :label="project.id" class="project-checkbox" />
+          <ProjectCard
+            :project="project"
+            :is-public="false"
+            @edit="handleEdit"
+            @delete="handleDeleteSuccess"
+            @view="handleViewProject"
+          />
+        </div>
       </div>
 
       <!-- 分页 -->
@@ -124,6 +131,9 @@ const sortBy = ref('created_at')
 const sortOrder = ref<'asc' | 'desc'>('desc')
 const currentPage = ref(1)
 const pageSize = ref(12)
+
+// 批量操作状态
+const selectedProjects = ref<number[]>([])
 
 // 表单状态
 const formVisible = ref(false)
@@ -191,6 +201,19 @@ const handleSizeChange = (size: number) => {
   pageSize.value = size
   currentPage.value = 1
   loadProjects()
+}
+
+const handleBatchDelete = async () => {
+  if (selectedProjects.value.length === 0) return
+
+  try {
+    await projectStore.bulkDeleteProjects(selectedProjects.value)
+    ElMessage.success(`成功删除 ${selectedProjects.value.length} 个项目`)
+    selectedProjects.value = []
+    loadProjects()
+  } catch (error) {
+    ElMessage.error('批量删除项目失败')
+  }
 }
 
 const goHome = () => {
@@ -264,6 +287,21 @@ onMounted(() => {
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 24px;
   margin-bottom: 32px;
+}
+
+.project-item {
+  position: relative;
+}
+
+.project-checkbox {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 10;
+}
+
+.batch-actions {
+  margin-left: auto;
 }
 
 .empty-content {

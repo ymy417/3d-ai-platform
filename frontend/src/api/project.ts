@@ -95,6 +95,25 @@ export const projectApi = {
         allow_download: allowDownload
       }
     })
+  },
+
+  // 批量删除项目
+  bulkDeleteProjects(ids: number[]) {
+    return apiClient.delete(`/projects/bulk`, {
+      params: {
+        project_ids: ids
+      }
+    })
+  },
+
+  // 删除评论
+  deleteComment(projectId: number, commentId: number) {
+    return apiClient.delete(`/projects/${projectId}/comments/${commentId}`)
+  },
+
+  // 获取收藏的项目
+  getFavoriteProjects(params?: ProjectFilterParams) {
+    return apiClient.get<ProjectListResponse>('/projects/favorites', { params })
   }
 }
 
