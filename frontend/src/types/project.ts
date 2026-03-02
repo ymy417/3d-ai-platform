@@ -18,6 +18,7 @@ export interface Project {
   name: string
   description: string | null
   user_id: number
+  username?: string
   status: 'draft' | 'processing' | 'completed' | 'archived'
   is_public: boolean
   allow_download: boolean
@@ -68,6 +69,7 @@ export const ProjectStatusMap: Record<string, { label: string; type: string }> =
 export interface Comment {
   id: number
   user_id: number
+  username?: string
   project_id: number
   content: string
   created_at: string
@@ -102,4 +104,5 @@ export interface PublishResponse {
   message: string
   is_public: boolean
   allow_download: boolean
+  status?: string
 }

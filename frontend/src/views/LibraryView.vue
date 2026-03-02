@@ -3,6 +3,9 @@
     <!-- 页面头部 -->
     <div class="page-header">
       <div class="header-left">
+        <el-button type="primary" plain @click="goHome">
+          <el-icon><House /></el-icon>返回主页
+        </el-button>
         <h1 class="page-title">我的项目库</h1>
         <p class="page-subtitle">管理和查看您的所有3D项目</p>
       </div>
@@ -104,7 +107,7 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { Plus, Search, SortDown, SortUp } from '@element-plus/icons-vue'
+import { Plus, Search, SortDown, SortUp, House } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import ProjectCard from '@/components/library/ProjectCard.vue'
 import ProjectForm from '@/components/library/ProjectForm.vue'
@@ -190,6 +193,10 @@ const handleSizeChange = (size: number) => {
   loadProjects()
 }
 
+const goHome = () => {
+  router.push('/')
+}
+
 // 监听分页变化
 watch([currentPage, pageSize], () => {
   projectStore.setPage(currentPage.value)
@@ -215,6 +222,10 @@ onMounted(() => {
   margin-bottom: 24px;
 
   .header-left {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
     .page-title {
       margin: 0 0 8px;
       font-size: 28px;

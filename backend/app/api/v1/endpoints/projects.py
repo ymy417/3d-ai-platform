@@ -306,6 +306,12 @@ async def list_public_projects(
     total = query.count()
     items = query.offset((page - 1) * page_size).limit(page_size).all()
     
+    # 添加用户名信息
+    for item in items:
+        user = db.query(User).filter(User.id == item.user_id).first()
+        if user:
+            item.username = user.username
+    
     return ProjectListResponse(
         items=items,
         total=total,
@@ -331,6 +337,11 @@ async def get_public_project(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="项目不存在或未公开"
         )
+    
+    # 添加用户名信息
+    user = db.query(User).filter(User.id == project.user_id).first()
+    if user:
+        project.username = user.username
     
     return project
 
@@ -421,6 +432,12 @@ async def get_project_comments(
         Comment.project_id == project_id
     ).order_by(Comment.created_at.desc()).all()
     
+    # 添加用户名信息
+    for comment in comments:
+        user = db.query(User).filter(User.id == comment.user_id).first()
+        if user:
+            comment.username = user.username
+    
     return comments
 
 
@@ -449,6 +466,9 @@ async def add_comment(
     db.add(new_comment)
     db.commit()
     db.refresh(new_comment)
+    
+    # 添加用户名信息
+    new_comment.username = current_user.username
     
     return new_comment
 
@@ -508,7 +528,11 @@ async def publish_project(
     if allow_download is not None:
         project.allow_download = allow_download
     
+    # 当项目设置为公开时，自动将状态设置为completed
+    if is_public and project.status != "completed":
+        project.status = "completed"
+    
     db.commit()
     db.refresh(project)
     
-    return {"message": "发布状态更新成功", "is_public": project.is_public, "allow_download": project.allow_download}
+    return {"message": "发布状态更新成功", "is_public": project.is_public, "allow_download": project.allow_download, "status": project.status}

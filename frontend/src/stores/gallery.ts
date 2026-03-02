@@ -120,11 +120,17 @@ export const useGalleryStore = defineStore('gallery', () => {
       if (index !== -1) {
         projects.value[index].is_public = response.data.is_public
         projects.value[index].allow_download = response.data.allow_download
+        if (response.data.status) {
+          projects.value[index].status = response.data.status
+        }
       }
       // 更新当前项目
       if (currentProject.value?.id === id) {
         currentProject.value.is_public = response.data.is_public
         currentProject.value.allow_download = response.data.allow_download
+        if (response.data.status) {
+          currentProject.value.status = response.data.status
+        }
       }
       return response.data
     } catch (error) {

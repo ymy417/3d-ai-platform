@@ -2,9 +2,14 @@
   <div class="gallery-project-detail-view">
     <!-- 页面头部 -->
     <div class="page-header">
-      <el-button type="primary" plain @click="goBack">
-        <el-icon><ArrowLeft /></el-icon>返回画廊
-      </el-button>
+      <div class="header-buttons">
+        <el-button type="primary" plain @click="goHome">
+          <el-icon><House /></el-icon>返回主页
+        </el-button>
+        <el-button type="primary" plain @click="goBack">
+          <el-icon><ArrowLeft /></el-icon>返回画廊
+        </el-button>
+      </div>
       <h1 class="page-title">{{ project?.name }}</h1>
     </div>
 
@@ -14,7 +19,7 @@
       <div v-if="project" class="project-info">
         <div class="project-header">
           <div class="project-meta">
-            <span class="project-author">作者: {{ project.user_id }}</span>
+            <span class="project-author">作者: {{ project.username || project.user_id }}</span>
             <span class="project-date">{{ formatDate(project.created_at) }}</span>
           </div>
           <div class="project-actions">
@@ -87,7 +92,7 @@
             </div>
             <div v-else v-for="comment in comments" :key="comment.id" class="comment-item">
               <div class="comment-header">
-                <span class="comment-author">{{ comment.user_id }}</span>
+                <span class="comment-author">{{ comment.username || comment.user_id }}</span>
                 <span class="comment-date">{{ formatDate(comment.created_at) }}</span>
               </div>
               <div class="comment-content">
@@ -109,7 +114,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
-import { ArrowLeft, Star, Collection, Download } from '@element-plus/icons-vue'
+import { ArrowLeft, Star, Collection, Download, House } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import { useRouter, useRoute } from 'vue-router'
 import Scene from '@/components/3d/Scene.vue'
@@ -176,6 +181,10 @@ const checkUserInteractions = async () => {
 // 事件处理
 const goBack = () => {
   router.push({ name: 'gallery' })
+}
+
+const goHome = () => {
+  router.push('/')
 }
 
 const handleLike = async () => {
@@ -284,6 +293,11 @@ onMounted(() => {
   align-items: center;
   gap: 24px;
   margin-bottom: 32px;
+
+  .header-buttons {
+    display: flex;
+    gap: 12px;
+  }
 
   .page-title {
     margin: 0;

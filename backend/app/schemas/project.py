@@ -24,6 +24,7 @@ class ProjectStatusUpdate(BaseModel):
 class ProjectResponse(ProjectBase):
     id: int
     user_id: int
+    username: Optional[str] = None
     status: str
     model_data: Dict[str, Any]
     storage_paths: Dict[str, Any]
@@ -55,6 +56,7 @@ class CommentCreate(BaseModel):
 class CommentResponse(BaseModel):
     id: int
     user_id: int
+    username: Optional[str] = None
     project_id: int
     content: str
     created_at: datetime

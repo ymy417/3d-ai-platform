@@ -1,6 +1,9 @@
 <template>
   <div class="profile-container">
     <div class="profile-header">
+      <button class="home-btn" @click="goHome">
+        <span class="home-icon">🏠</span> 返回主页
+      </button>
       <h1>个人中心</h1>
     </div>
 
@@ -308,12 +311,18 @@
 import { reactive, ref, onMounted } from 'vue'
 import { Lock, SwitchButton, Message } from '@element-plus/icons-vue'
 import { useAuthStore } from '@/stores/auth'
+import { useRouter } from 'vue-router'
 import { appealApi } from '@/api/appeal'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import type { Appeal } from '@/types/appeal'
 
 const authStore = useAuthStore()
+const router = useRouter()
+
+const goHome = () => {
+  router.push('/')
+}
 
 const isEditing = ref(false)
 const changingPassword = ref(false)
@@ -603,12 +612,38 @@ function formatDate(date?: string) {
 }
 
 .profile-header {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
   margin-bottom: 24px;
+  position: relative;
+}
+
+.home-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.home-btn:hover {
+  background: #e9ecef;
+  transform: translateY(-2px);
+}
+
+.home-icon {
+  font-size: 1.2rem;
 }
 
 .profile-header h1 {
   font-size: 24px;
   color: #333;
+  margin: 0;
 }
 
 .profile-content {
