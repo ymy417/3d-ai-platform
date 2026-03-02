@@ -51,7 +51,8 @@ export interface ProjectStatusUpdateRequest {
 
 export interface ProjectFilterParams {
   status?: string
-  search?: string
+  search_type?: 'project' | 'user'
+  search_value?: string
   sort_by?: string
   sort_order?: 'asc' | 'desc'
   page?: number

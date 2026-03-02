@@ -137,6 +137,127 @@ async def toggle_project_public(
     return project
 
 
+# ========== 公共画廊接口 ==========
+
+@router.get("/public/list", response_model=ProjectListResponse)
+async def list_public_projects(
+    search_type: Optional[str] = Query(None, description="搜索类型: project或user"),
+    search_value: Optional[str] = Query(None, description="搜索值"),
+    sort_by: str = Query("created_at", description="排序字段"),
+    sort_order: str = Query("desc", description="排序方向"),
+    page: int = Query(1, ge=1, description="页码"),
+    page_size: int = Query(12, ge=1, le=100, description="每页数量"),
+    db: Session = Depends(get_db)
+):
+    """获取公共项目列表"""
+    query = db.query(Project).filter(Project.is_public == True, Project.status == "completed")
+    
+    # 搜索
+    if search_value:
+        if search_type == "user":
+            # 按作者名称搜索
+            user_ids = db.query(User.id).filter(User.username.contains(search_value)).all()
+            user_ids = [user[0] for user in user_ids]
+            if user_ids:
+                query = query.filter(Project.user_id.in_(user_ids))
+        else:
+            # 按项目名称搜索
+            query = query.filter(Project.name.contains(search_value))
+    
+    # 排序
+    if sort_order == "desc":
+        query = query.order_by(getattr(Project, sort_by).desc())
+    else:
+        query = query.order_by(getattr(Project, sort_by).asc())
+    
+    # 分页
+    total = query.count()
+    items = query.offset((page - 1) * page_size).limit(page_size).all()
+    
+    # 添加用户名信息
+    for item in items:
+        user = db.query(User).filter(User.id == item.user_id).first()
+        if user:
+            item.username = user.username
+    
+    return ProjectListResponse(
+        items=items,
+        total=total,
+        page=page,
+        page_size=page_size
+    )
+
+
+@router.get("/public/{project_id}", response_model=ProjectResponse)
+async def get_public_project(
+    project_id: int,
+    db: Session = Depends(get_db)
+):
+    """获取公共项目详情"""
+    project = db.query(Project).filter(
+        Project.id == project_id,
+        Project.is_public == True,
+        Project.status == "completed"
+    ).first()
+    
+    if not project:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="项目不存在或未公开"
+        )
+    
+    # 添加用户名信息
+    user = db.query(User).filter(User.id == project.user_id).first()
+    if user:
+        project.username = user.username
+    
+    return project
+
+
+@router.get("/favorites")
+async def get_favorite_projects(
+    sort_by: str = Query("created_at", description="排序字段"),
+    sort_order: str = Query("desc", description="排序方向"),
+    page: int = Query(1, ge=1, description="页码"),
+    page_size: int = Query(12, ge=1, le=100, description="每页数量"),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """获取用户收藏的项目"""
+    # 查询用户收藏的项目
+    query = db.query(Project).join(Favorite, Project.id == Favorite.project_id).filter(
+        Favorite.user_id == current_user.id,
+        Project.is_public == True,
+        Project.status == "completed"
+    )
+    
+    # 排序
+    if sort_order == "desc":
+        query = query.order_by(getattr(Project, sort_by).desc())
+    else:
+        query = query.order_by(getattr(Project, sort_by).asc())
+    
+    # 分页
+    total = query.count()
+    items = query.offset((page - 1) * page_size).limit(page_size).all()
+    
+    # 添加用户名信息
+    for item in items:
+        user = db.query(User).filter(User.id == item.user_id).first()
+        if user:
+            item.username = user.username
+    
+    return ProjectListResponse(
+        items=items,
+        total=total,
+        page=page,
+        page_size=page_size
+    )
+
+
+
+
+
 @router.get("/{project_id}", response_model=ProjectResponse)
 async def get_project(
     project_id: int,
@@ -278,74 +399,6 @@ async def duplicate_project(
     return new_project
 
 
-# ========== 公共画廊接口 ==========
-
-@router.get("/public/list", response_model=ProjectListResponse)
-async def list_public_projects(
-    search: Optional[str] = Query(None, description="按名称搜索"),
-    sort_by: str = Query("created_at", description="排序字段"),
-    sort_order: str = Query("desc", description="排序方向"),
-    page: int = Query(1, ge=1, description="页码"),
-    page_size: int = Query(12, ge=1, le=100, description="每页数量"),
-    db: Session = Depends(get_db)
-):
-    """获取公共项目列表"""
-    query = db.query(Project).filter(Project.is_public == True, Project.status == "completed")
-    
-    # 名称搜索
-    if search:
-        query = query.filter(Project.name.contains(search))
-    
-    # 排序
-    if sort_order == "desc":
-        query = query.order_by(getattr(Project, sort_by).desc())
-    else:
-        query = query.order_by(getattr(Project, sort_by).asc())
-    
-    # 分页
-    total = query.count()
-    items = query.offset((page - 1) * page_size).limit(page_size).all()
-    
-    # 添加用户名信息
-    for item in items:
-        user = db.query(User).filter(User.id == item.user_id).first()
-        if user:
-            item.username = user.username
-    
-    return ProjectListResponse(
-        items=items,
-        total=total,
-        page=page,
-        page_size=page_size
-    )
-
-
-@router.get("/public/{project_id}", response_model=ProjectResponse)
-async def get_public_project(
-    project_id: int,
-    db: Session = Depends(get_db)
-):
-    """获取公共项目详情"""
-    project = db.query(Project).filter(
-        Project.id == project_id,
-        Project.is_public == True,
-        Project.status == "completed"
-    ).first()
-    
-    if not project:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="项目不存在或未公开"
-        )
-    
-    # 添加用户名信息
-    user = db.query(User).filter(User.id == project.user_id).first()
-    if user:
-        project.username = user.username
-    
-    return project
-
-
 @router.post("/{project_id}/like")
 async def toggle_like(
     project_id: int,
@@ -471,6 +524,33 @@ async def add_comment(
     new_comment.username = current_user.username
     
     return new_comment
+
+
+@router.delete("/{project_id}/comments/{comment_id}")
+async def delete_comment(
+    project_id: int,
+    comment_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """删除评论"""
+    # 检查评论是否存在且属于当前用户
+    comment = db.query(Comment).filter(
+        Comment.id == comment_id,
+        Comment.project_id == project_id,
+        Comment.user_id == current_user.id
+    ).first()
+    
+    if not comment:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="评论不存在或无权删除"
+        )
+    
+    db.delete(comment)
+    db.commit()
+    
+    return {"message": "评论删除成功"}
 
 
 @router.get("/{project_id}/download")

@@ -12,6 +12,7 @@ import LibraryView from '../views/LibraryView.vue'
 import ProjectDetailView from '../views/ProjectDetailView.vue'
 import GalleryView from '../views/GalleryView.vue'
 import GalleryProjectDetailView from '../views/GalleryProjectDetailView.vue'
+import UserDetailView from '../views/UserDetailView.vue'
 import NotFound from '../views/NotFound.vue'
 
 // Admin
@@ -92,6 +93,11 @@ const router = createRouter({
       path: '/gallery/project/:id',
       name: 'gallery-project-detail',
       component: GalleryProjectDetailView,
+    },
+    {
+      path: '/gallery/user/:id',
+      name: 'gallery-user-detail',
+      component: UserDetailView,
     },
     // Admin routes
     {

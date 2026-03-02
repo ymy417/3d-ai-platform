@@ -31,8 +31,8 @@ export const useGalleryStore = defineStore('gallery', () => {
     loading.value = true
     try {
       const response = await projectApi.getPublicProjects({
-        page: page.value,
-        page_size: pageSize.value,
+        page: 1,
+        page_size: 12,
         ...params
       })
       projects.value = response.data.items
@@ -139,6 +139,52 @@ export const useGalleryStore = defineStore('gallery', () => {
     }
   }
 
+  const bulkDeleteProjects = async (ids: number[]) => {
+    try {
+      const response = await projectApi.bulkDeleteProjects(ids)
+      // 从列表中移除删除的项目
+      projects.value = projects.value.filter(p => !ids.includes(p.id))
+      return response.data
+    } catch (error) {
+      console.error('批量删除项目失败:', error)
+      throw error
+    }
+  }
+
+  const deleteComment = async (projectId: number, commentId: number) => {
+    try {
+      const response = await projectApi.deleteComment(projectId, commentId)
+      // 从列表中移除删除的评论
+      comments.value = comments.value.filter(c => c.id !== commentId)
+      return response.data
+    } catch (error) {
+      console.error('删除评论失败:', error)
+      throw error
+    }
+  }
+
+  const fetchFavoriteProjects = async (params?: ProjectFilterParams) => {
+    loading.value = true
+    projects.value = []
+    try {
+      const response = await projectApi.getFavoriteProjects({
+        page: 1,
+        page_size: 12,
+        ...params
+      })
+      projects.value = response.data.items
+      total.value = response.data.total
+      return response.data
+    } catch (error) {
+      console.error('获取收藏项目失败:', error)
+      projects.value = []
+      total.value = 0
+      throw error
+    } finally {
+      loading.value = false
+    }
+  }
+
   const setPage = (newPage: number) => {
     page.value = newPage
   }
@@ -169,6 +215,9 @@ export const useGalleryStore = defineStore('gallery', () => {
     addComment,
     downloadProject,
     publishProject,
+    bulkDeleteProjects,
+    deleteComment,
+    fetchFavoriteProjects,
     setPage,
     clearCurrentProject
   }

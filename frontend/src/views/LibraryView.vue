@@ -49,6 +49,8 @@
           <el-icon><SortUp /></el-icon>
         </el-radio-button>
       </el-radio-group>
+
+
     </div>
 
     <!-- 项目列表 -->
@@ -70,15 +72,15 @@
 
       <!-- 项目网格 -->
       <div v-else class="projects-grid">
-        <ProjectCard
-          v-for="project in projectStore.projects"
-          :key="project.id"
-          :project="project"
-          :is-public="false"
-          @edit="handleEdit"
-          @delete="handleDeleteSuccess"
-          @view="handleViewProject"
-        />
+        <div class="project-item" v-for="project in projectStore.projects" :key="project.id">
+          <ProjectCard
+            :project="project"
+            :is-public="false"
+            @edit="handleEdit"
+            @delete="handleDeleteSuccess"
+            @view="handleViewProject"
+          />
+        </div>
       </div>
 
       <!-- 分页 -->
@@ -124,6 +126,8 @@ const sortBy = ref('created_at')
 const sortOrder = ref<'asc' | 'desc'>('desc')
 const currentPage = ref(1)
 const pageSize = ref(12)
+
+
 
 // 表单状态
 const formVisible = ref(false)
@@ -192,6 +196,8 @@ const handleSizeChange = (size: number) => {
   currentPage.value = 1
   loadProjects()
 }
+
+
 
 const goHome = () => {
   router.push('/')
@@ -264,6 +270,21 @@ onMounted(() => {
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 24px;
   margin-bottom: 32px;
+}
+
+.project-item {
+  position: relative;
+}
+
+.project-checkbox {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 10;
+}
+
+.batch-actions {
+  margin-left: auto;
 }
 
 .empty-content {

@@ -113,6 +113,8 @@ export const useProjectStore = defineStore('projects', () => {
     }
   }
 
+
+
   const setPage = (newPage: number) => {
     page.value = newPage
   }

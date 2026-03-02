@@ -161,8 +161,38 @@ async def get_user_projects(
             detail="用户不存在"
         )
     
-    projects = db.query(Project).filter(Project.owner_id == user_id).all()
+    projects = db.query(Project).filter(Project.user_id == user_id).all()
     return projects
+
+
+@router.get("/public/{user_id}")
+async def get_public_user_info(
+    user_id: int,
+    db: Session = Depends(get_db)
+):
+    """获取用户公共信息和其发布的公共项目"""
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="用户不存在"
+        )
+    
+    # 获取用户发布的公共项目
+    projects = db.query(Project).filter(
+        Project.user_id == user_id,
+        Project.is_public == True,
+        Project.status == "completed"
+    ).all()
+    
+    # 添加用户名信息到项目
+    for project in projects:
+        project.username = user.username
+    
+    return {
+        "user": user,
+        "projects": projects
+    }
 
 
 @router.delete("/{user_id}")

@@ -20,6 +20,10 @@
       </p>
       <div class="project-meta">
         <span class="update-time">{{ formatDate(project.updated_at) }}</span>
+        <span v-if="project.is_public" class="author-info">
+          <el-icon><User /></el-icon>
+          <span class="author-name" @click="handleViewAuthor">{{ project.username || project.user_id }}</span>
+        </span>
         <span v-if="project.is_public" class="download-status">
           <el-icon><Download /></el-icon>{{ project.allow_download ? '可下载' : '不可下载' }}
         </span>
@@ -107,6 +111,7 @@ const emit = defineEmits<{
   edit: [project: Project]
   delete: [id: number]
   view: [project: Project]
+  viewAuthor: [userId: number]
 }>()
 
 const router = useRouter()
@@ -212,6 +217,10 @@ const handleDelete = async () => {
 const handleView = () => {
   emit('view', props.project)
 }
+
+const handleViewAuthor = () => {
+  emit('viewAuthor', props.project.user_id)
+}
 </script>
 
 <style scoped lang="scss">
@@ -228,6 +237,10 @@ const handleView = () => {
   :deep(.el-card__body) {
     padding: 0;
   }
+}
+
+.project-item:hover .project-checkbox {
+  display: block;
 }
 
 .project-thumbnail {
@@ -288,10 +301,26 @@ const handleView = () => {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 12px;
     
     .update-time {
       font-size: 12px;
       color: #909399;
+    }
+    
+    .author-info {
+      font-size: 12px;
+      color: #409eff;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      
+      .author-name {
+        cursor: pointer;
+        &:hover {
+          text-decoration: underline;
+        }
+      }
     }
     
     .download-status {
